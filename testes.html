@@ -1,0 +1,43 @@
+<!--Aba que mostra o teste escolhido, o tempo que levou e a média das últimas 3 tentativas-->
+<!--Também mostra um mini histórico local-->
+<!--Status: inacabado-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+     <header>
+        <h1>Acompanhe o seu teste de tempo de reação!</h1><br>
+    </header>
+
+    <main>
+    <!--APAGAR DEPOIS!!!!!!!!-->
+    <form>
+        <p>Teste:</p>
+        <input type="text" id="inputTeste" placeholder="Digite seu nome aqui..."><br>
+        <p>Tempo:</p>
+        <input type="text" id="inputTempo" placeholder="Digite seu nome aqui..."><br>
+        <p>Media</p>
+        <input type="text" id="inputMedia" placeholder="Digite seu nome aqui...">
+    </form>
+
+    <h2>Teste escolhido: <span id="teste"></span></h2>
+    <h2>Tempo: <span id="tempo"></span></h2>
+    <h2>Média das últimas três tentativas: <span id="media"></span></h2>
+
+    <p id="msg_atualizar_pagina" style="color: red;"></p>
+
+    <button id="btn_salvar_teste">Armazenar Teste</button>
+
+    <h3>Histórico:</h3>
+    <ul id="historico"></ul>
+    </main>
+
+    <script src="js/main.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<!----------------------------------------------------------------------------------------------------------------------------------->
+<body>
+    <!--Título da página e uma breve descrição/introdução-->
+    <header>
+        <h1>Medidor de tempo de reação</h1>
+        <p>Seja bem vindo ao site!</p><br>
+        <p>Caso já possua uma conta, por favor <a href="entrar.html">clique aqui!</a></p><br>
+    </header>
+
+    <!------------------------------------------------------------------------------------------------------------------------------->
+    <main>
+        <!--Seção para coletar as informações do usuário-->
+        <h2>Por favor cadastre suas informações:</h2>
+
+        <!--Nome completo: tipo texto-->
+        <section>
+            <h3>Nome completo</h3>
+            <form>
+                <input type="text" id="inputNome" placeholder="Digite seu nome aqui...">
+            </form> 
+        </section>
+
+        <!--Data de nascimento: tipo escolha da data dd/mm/aa-->
+        <section>
+            <h3>Digite sua idade</h3>
+            <form>
+                <input type="number" id="inputIdade">
+            </form> 
+        </section>
+
+        <!--Gênero: duas opções homem ou mulher-->
+        <section>
+            <h3>Gênero</h3>
+            <form>
+                <select id="inputGenero">
+                    <option value="">Selecione uma opção...</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="feminino">Feminino</option>
+                </select>
+            </form>
+        </section>
+        
+        <!--Aptidão física: é atleta?-->
+        <section>
+            <h3>Você se considera um atleta (treinamento focado em performance e competição)?</h3>
+            <form>
+                <select id="inputAtleta">
+                    <option value="">Selecione uma opção...</option>
+                    <option value="atleta">Sim</option>
+                    <option value="nao_atleta">Não</option>
+                </select>
+            </form> 
+        </section>
+
+        <!--Email: tipo email-->
+        <section>
+            <h3>E-mail</h3>
+            <form>
+                <input type="email" id="inputEmail" placeholder="Digite seu e-mail aqui...">
+            </form> 
+        </section>
+
+        <!--Senha: tipo senha-->
+        <section>
+            <h3>Senha</h3>
+            <form>
+                <input type="password" id="inputSenha" placeholder="Crie uma senha...">
+            </form> 
+        </section>
+
+    </main>
+    <!------------------------------------------------------------------------------------------------------------------------------->
+    <!--Botão para enviar as informações para o cartão SD !!FAZER!!-->
+    <!--Por enquanto ele só serve para ir para a próxima página-->
+    <footer>
+    <br>
+    <button id="btn_salvar_usuario">Continuar</button>
+    </footer>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+<!----------------------------------------------------------------------------------------------------------------------------------->
+</html>
