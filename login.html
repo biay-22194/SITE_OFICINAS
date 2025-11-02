@@ -25,55 +25,39 @@
 
         <!--Nome completo: tipo texto-->
         <section>
-            <h3>Nome completo</h3>
             <form>
-                <input type="text" id="inputNome" placeholder="Digite seu nome aqui...">
-            </form> 
-        </section>
+                <!--Nome-->
+                <h3>Nome completo</h3>
+                <input type="text" id="inputNome" placeholder="Digite seu nome aqui..."><br>
 
-        <!--Idade-->
-        <section>
-            <h3>Digite sua idade</h3>
-            <form>
-                <input type="number" id="inputIdade">
-            </form> 
-        </section>
+                <!--Idade-->
+                <h3>Digite sua idade</h3>
+                <input type="number" id="inputIdade"><br>
 
-        <!--Gênero: duas opções homem ou mulher-->
-        <section>
-            <h3>Gênero</h3>
-            <form>
+                <!--Gênero-->
+                <h3>Gênero</h3>
                 <select id="inputGenero">
                     <option value="">Selecione uma opção...</option>
                     <option value="masculino">Masculino</option>
                     <option value="feminino">Feminino</option>
-                </select>
-            </form>
-        </section>
+                </select><br>
 
-        <!--Email: tipo email-->
-        <section>
-            <h3>E-mail</h3>
-            <form>
-                <input type="email" id="inputEmail" placeholder="Digite seu e-mail aqui...">
+                <!--Email-->
+                <h3>E-mail</h3>
+                <input type="email" id="inputEmail" placeholder="Digite seu e-mail aqui..."><br>
+
+                <!--Senha-->
+                <h3>Senha</h3>
+                <input type="password" id="inputSenha" placeholder="Crie uma senha..."><br>
+                <br>
+                <!--Botão que armazena as informações e vai para a página de início-->
+                <button id="btn_salvar_usuario">Continuar</button>
             </form> 
         </section>
 
-        <!--Senha: tipo senha-->
-        <section>
-            <h3>Senha</h3>
-            <form>
-                <input type="password" id="inputSenha" placeholder="Crie uma senha...">
-            </form> 
-        </section>
+        
 
     </main>
-    <!-------------------------------------------------------------------------------------------->
-    <!--Vai para a página de início - arquivo index.html-->
-    <footer>
-    <br>
-    <button id="btn_salvar_usuario">Continuar</button>
-    </footer>
 
     <script type="module" src="js/main.js"></script>
 </body>

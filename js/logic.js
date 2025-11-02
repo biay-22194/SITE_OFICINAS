@@ -143,7 +143,6 @@ export function compara_informacoes_entrada(){
 //Armazena as informações dos testes 
 // !!!!!!!!!!!!!!!!!!!!!Precisa receber as informações dos testes do cartão SD!!!!!!!!!!!!!!!!!!!!!
 // variáveis a serem preenchidas:  inpuTeste, inputTempo, inputMedia
-// enviar vetor dadosTestes
 export function armazenar_testes(){
 
     // Se 'infoUsuario' for 'null' (ou seja, ninguém está logado)
