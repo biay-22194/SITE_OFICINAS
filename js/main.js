@@ -3,7 +3,7 @@ outros arquivos e adiciona os event listeners (como onclick) para fazer tudo fun
 
 //------------------------------------------------------------------------------------------------
 
-import { armazenar_info_usuario, armazenar_testes } from './logic.js';
+import { armazenar_info_usuario, armazenar_testes, compara_informacoes_entrada } from './logic.js';
 import { mostrarHistorico, mostrarGraficoLinha } from './ui.js';
 
 //------------------------------------------------------------------------------------------------
@@ -13,6 +13,17 @@ let botaoSalvar = document.getElementById("btn_salvar_usuario");
 if (botaoSalvar) { // Se o botão (com esse ID) for encontrado...
     botaoSalvar.addEventListener("click", () => { // ...adicione o "ouvinte de clique"
         armazenar_info_usuario(); // pega função do logic.js
+    });
+}
+
+//------------------------------------------------------------------------------------------------
+
+// Arquivo: entrar.html - compara email e senha, se estiverem iguais prossegue para a página de 
+// início
+let botaoEntrar = document.getElementById("btn_entrar");
+if (botaoEntrar) { // Se o botão (com esse ID) for encontrado...
+    botaoEntrar.addEventListener("click", () => { // ...adicione o "ouvinte de clique"
+        compara_informacoes_entrada(); // pega função do logic.js
     });
 }
 
@@ -35,5 +46,13 @@ if (botaoMostrarGrafico) { // Se o botão (com esse ID) for encontrado...
     botaoMostrarGrafico.addEventListener("click", () => { // ...adicione o "ouvinte de clique"
     mostrarGraficoLinha();
 });
+}
+
+//----------------------------------------------------------------------------------------------
+let botaoSair = document.getElementById("btn_sair");
+if (botaoSair) {
+    botaoSair.addEventListener("click", () => {
+        fazerLogout(); // Chama a função que acabamos de criar
+    });
 }
 

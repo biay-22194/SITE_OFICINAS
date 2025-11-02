@@ -3,7 +3,7 @@ state. armazenar_testes e analisa_resultados vivem aqui. */
 
 //------------------------------------------------------------------------------------------------
 
-import { dadosTestes, infoUsuario, tentativas, incrementarTentativas,  media_padrao } from './state.js';
+import { listaUsuarios, infoUsuario, media_padrao } from './state.js';
 import { mostrarHistorico } from './ui.js';
 
 //------------------------------------------------------------------------------------------------
@@ -66,17 +66,84 @@ export function armazenar_info_usuario(){
         return; // Para a execução se houver erros
     }
 
-    // Se a validação passar, você pode armazenar as informações no 'infoUsuario' (se necessário)
-    // Exemplo:
-    if (inputIdade) {
-        infoUsuario.idade = parseInt(idadeString); 
+    // Se o email já existe
+    const emailJaExiste = listaUsuarios.find(usuario => usuario.email === email);
+    if (emailJaExiste) {
+        alert("Este e-mail já foi cadastrado. Por favor, use outro.");
+        return;
     }
-    if (inputGenero) {
-        infoUsuario.genero = genero;
-    }
-    localStorage.setItem('dadosUsuario', JSON.stringify(infoUsuario));
-    // Se tudo estiver OK, redireciona
+
+    const novoUsuario = {
+        nome: nome,
+        idade: parseInt(idadeString),
+        genero: genero,
+        email: email,
+        senha: senha,
+        historicoTestes: [], // O 'dadosTestes' pessoal deste usuário
+        tentativas: 0        // O 'tentativas' pessoal deste usuário
+    };
+
+    // 2. Adiciona o novo usuário ao array
+    listaUsuarios.push(novoUsuario);
+
+    // 3. Salva o array ATUALIZADO de volta no localStorage
+    localStorage.setItem('usuariosCadastrados', JSON.stringify(listaUsuarios));
+
+    // Redireciona para a página de ENTRAR (não para o index)
     window.location.href = "index.html";
+}
+
+//------------------------------------------------------------------------------------------------
+
+
+export function compara_informacoes_entrada(){
+
+    // Armazena email 
+    let entradaEmail = document.getElementById("email_entrar");
+    const email = entradaEmail ? entradaEmail.value.trim() : "";
+
+    // Armazena senha 
+    let entradaSenha = document.getElementById("senha_entrar");
+    const senha = entradaSenha ? entradaSenha.value.trim() : "";
+
+    // --- INÍCIO DO DIAGNÓSTICO ---
+    // Abra o console (F12) para ver isso
+    console.log("--- Tentativa de Login ---");
+    console.log("Email digitado:", email);
+    console.log("Senha digitada:", senha);
+    console.log("Lista de usuários carregada (listaUsuarios):", listaUsuarios);
+    // --- FIM DO DIAGNÓSTICO ---
+
+    // 1. Verifica campos em branco
+    if (email === "" || senha === "") {
+        alert("Por favor, preencha o e-mail e a senha.");
+        return; // Para a execução
+    } 
+
+    // --- LÓGICA DE LOGIN ATUALIZADA ---
+
+    // 2. Procura na 'listaUsuarios'
+    //    Usamos .toLowerCase() para tornar a busca do E-MAIL insensível ao caso.
+    const usuarioEncontrado = listaUsuarios.find(usuario => 
+        usuario.email.toLowerCase() === email.toLowerCase() && // <-- A CORREÇÃO ESTÁ AQUI
+        usuario.senha === senha // A senha continua sensível ao caso
+    );
+
+    // 3. Verifica se o usuário foi encontrado
+    if (usuarioEncontrado) {
+        // SUCESSO!
+        console.log("SUCESSO: Usuário encontrado:", usuarioEncontrado);
+        
+        // Salva os dados DESTE usuário para o resto do app usar
+        localStorage.setItem('dadosUsuario', JSON.stringify(usuarioEncontrado));
+        
+        window.location.href = "index.html"; // Redireciona para a pág principal
+    } 
+    else {
+        // FALHA!
+        console.warn("FALHA: E-mail ou senha não correspondem.");
+        alert("E-mail ou senha incorretos. Por favor, tente novamente.");
+    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -86,6 +153,14 @@ export function armazenar_info_usuario(){
 // variáveis a serem preenchidas:  inpuTeste, inputTempo, inputMedia
 // enviar vetor dadosTestes
 export function armazenar_testes(){
+
+    // Se 'infoUsuario' for 'null' (ou seja, ninguém está logado)
+    if (!infoUsuario) {
+        alert("ERRO: Você não está logado! Por favor, faça o login para salvar os testes.");
+        // Redireciona para a página de login para forçar o login
+        window.location.href = "entrar.html"; // Mude para o nome da sua pág de login
+        return; // Para a execução da função aqui
+    }
 
     // (Simulação) Recebe os valores do cartão SD
     let inputTeste = document.getElementById("inputTeste").value;
@@ -114,22 +189,28 @@ export function armazenar_testes(){
     else {
         // Nas próximas vezes, limpa a mensagem e só armazena
         msg_atualizar_pagina.textContent = ""; // Limpa a mensagem de erro
-        dadosTestes.push(novoTeste);
-        incrementarTentativas();
+        infoUsuario.historicoTestes.push(novoTeste);
+        // Incrementa as TENTATIVAS PESSOAIS do usuário logado
+        infoUsuario.tentativas++;
         // Chama a função para redesenhar o histórico
         mostrarHistorico();
-    }
 
-    localStorage.setItem('meusTestes', JSON.stringify(dadosTestes));
-    // Salvamos o contador de tentativas
-    localStorage.setItem('numTentativas', tentativas.toString());
+        localStorage.setItem('dadosUsuario', JSON.stringify(infoUsuario));
+
+        const indexUsuario = listaUsuarios.findIndex(user => user.email === infoUsuario.email);
+        if (indexUsuario !== -1) {
+            listaUsuarios[indexUsuario] = infoUsuario; // Substitui o objeto antigo pelo novo
+            // Salva a lista inteira de volta no localStorage
+            localStorage.setItem('usuariosCadastrados', JSON.stringify(listaUsuarios));
+        }
+    }
+ 
 }
 
 //------------------------------------------------------------------------------------------------
 
 // Este objeto armazena TODAS as regras
 // Formato: [idade_min, idade_max, lim_inf, lim_sup]
-//Bom armazenar??
 const LIMITES_PADRAO = {
     // Chave do Teste (Tipo "1")
     '1': { 
@@ -200,10 +281,10 @@ const LIMITES_PADRAO = {
 };
 
 export function analisa_resultados(i){
-    let testeAtual = dadosTestes[i];
+    let teste_ordem_cresc = infoUsuario.historicoTestes[i];
     
     // Pega o tipo de teste, gênero e idade (garante que idade seja número)
-    const tipoTeste = testeAtual.tipo; // "1", "2", etc.
+    const tipoTeste = teste_ordem_cresc .tipo; // "1", "2", etc.
     const genero = infoUsuario.genero; // "masculino", "feminino"
     const idade = parseInt(infoUsuario.idade); // Garante que é um número
 
@@ -244,4 +325,17 @@ export function analisa_resultados(i){
     console.warn(`A idade ${idade} não se encaixou em nenhuma faixa para: Tipo=${tipoTeste}, Genero=${genero}`);
     media_padrao.lim_inf = 0;
     media_padrao.lim_sup = 0;
+}
+
+//--------------------------------------------------------------------------------------------------
+export function fazerLogout() {
+    console.log("Fazendo logout...");
+    
+    // 1. Remove APENAS o 'dadosUsuario' (limpa a mesa)
+    // ISSO NÃO APAGA O USUÁRIO DA 'listaUsuarios' (da estante)
+    localStorage.removeItem('dadosUsuario'); 
+    
+    // 2. Envia o usuário de volta para a página de login
+    alert("Você saiu com sucesso.");
+    window.location.href = "entrar.html"; // Mude para o nome da sua pág de login
 }
