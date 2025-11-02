@@ -4,7 +4,7 @@ outros arquivos e adiciona os event listeners (como onclick) para fazer tudo fun
 //------------------------------------------------------------------------------------------------
 
 import { armazenar_info_usuario, armazenar_testes, compara_informacoes_entrada } from './logic.js';
-import { mostrarHistorico, mostrarGraficoLinha } from './ui.js';
+import { mostrarGraficoLinha } from './ui.js';
 
 //------------------------------------------------------------------------------------------------
 
@@ -49,6 +49,9 @@ if (botaoMostrarGrafico) { // Se o botão (com esse ID) for encontrado...
 }
 
 //----------------------------------------------------------------------------------------------
+
+//Arquivo: usuario.html
+//Desloga da conta
 let botaoSair = document.getElementById("btn_sair");
 if (botaoSair) {
     botaoSair.addEventListener("click", () => {

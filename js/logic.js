@@ -7,11 +7,11 @@ import { listaUsuarios, infoUsuario, media_padrao } from './state.js';
 import { mostrarHistorico } from './ui.js';
 
 //------------------------------------------------------------------------------------------------
-
 //Armazena as informações dadas no login pelo usuário 
 //Status: funcionando 
 // !!!!!!!!!!!!!!!!!!!!!Precisa enviar as informações de cadastro para o cartão SD!!!!!!!!!!!!!!!!!!!!!
-// variáveis a serem mandadas: nome, idadeString, genero, email, senha e objeto infoUsuario
+// linha 91 precisa salvar no cartao 
+// localStorage.setItem('usuariosCadastrados', JSON.stringify(listaUsuarios));
 export function armazenar_info_usuario(){
     
     // Armazena nome
@@ -86,6 +86,7 @@ export function armazenar_info_usuario(){
     // 2. Adiciona o novo usuário ao array
     listaUsuarios.push(novoUsuario);
 
+    //SALVAR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // 3. Salva o array ATUALIZADO de volta no localStorage
     localStorage.setItem('usuariosCadastrados', JSON.stringify(listaUsuarios));
 
@@ -95,7 +96,8 @@ export function armazenar_info_usuario(){
 
 //------------------------------------------------------------------------------------------------
 
-
+// Compara o input com as informacoes guardadas na listaUsuarios
+// ver linha 130
 export function compara_informacoes_entrada(){
 
     // Armazena email 
@@ -106,21 +108,11 @@ export function compara_informacoes_entrada(){
     let entradaSenha = document.getElementById("senha_entrar");
     const senha = entradaSenha ? entradaSenha.value.trim() : "";
 
-    // --- INÍCIO DO DIAGNÓSTICO ---
-    // Abra o console (F12) para ver isso
-    console.log("--- Tentativa de Login ---");
-    console.log("Email digitado:", email);
-    console.log("Senha digitada:", senha);
-    console.log("Lista de usuários carregada (listaUsuarios):", listaUsuarios);
-    // --- FIM DO DIAGNÓSTICO ---
-
     // 1. Verifica campos em branco
     if (email === "" || senha === "") {
         alert("Por favor, preencha o e-mail e a senha.");
         return; // Para a execução
     } 
-
-    // --- LÓGICA DE LOGIN ATUALIZADA ---
 
     // 2. Procura na 'listaUsuarios'
     //    Usamos .toLowerCase() para tornar a busca do E-MAIL insensível ao caso.
@@ -187,7 +179,6 @@ export function armazenar_testes(){
         msg_atualizar_pagina.textContent = "Por favor faça uma tentativa antes de atualizar a página!";
     }
     else {
-        // Nas próximas vezes, limpa a mensagem e só armazena
         msg_atualizar_pagina.textContent = ""; // Limpa a mensagem de erro
         infoUsuario.historicoTestes.push(novoTeste);
         // Incrementa as TENTATIVAS PESSOAIS do usuário logado
