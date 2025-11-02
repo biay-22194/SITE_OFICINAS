@@ -1,3 +1,7 @@
+<!--Aba de login - a primeira que aparece-->
+<!--Leva para a aba de início, recebe informações de login-->
+<!--Status: funcionando-->
+<!------------------------------------------------------------------------------------------------>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -6,7 +10,7 @@
     <title>Login</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<!----------------------------------------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------>
 <body>
     <!--Título da página e uma breve descrição/introdução-->
     <header>
@@ -14,8 +18,7 @@
         <p>Seja bem vindo ao site!</p><br>
         <p>Caso já possua uma conta, por favor <a href="entrar.html">clique aqui!</a></p><br>
     </header>
-
-    <!------------------------------------------------------------------------------------------------------------------------------->
+    <!------------------------------------------------------------------------------------------->
     <main>
         <!--Seção para coletar as informações do usuário-->
         <h2>Por favor cadastre suas informações:</h2>
@@ -28,7 +31,7 @@
             </form> 
         </section>
 
-        <!--Data de nascimento: tipo escolha da data dd/mm/aa-->
+        <!--Idade-->
         <section>
             <h3>Digite sua idade</h3>
             <form>
@@ -46,18 +49,6 @@
                     <option value="feminino">Feminino</option>
                 </select>
             </form>
-        </section>
-        
-        <!--Aptidão física: é atleta?-->
-        <section>
-            <h3>Você se considera um atleta (treinamento focado em performance e competição)?</h3>
-            <form>
-                <select id="inputAtleta">
-                    <option value="">Selecione uma opção...</option>
-                    <option value="atleta">Sim</option>
-                    <option value="nao_atleta">Não</option>
-                </select>
-            </form> 
         </section>
 
         <!--Email: tipo email-->
@@ -77,9 +68,8 @@
         </section>
 
     </main>
-    <!------------------------------------------------------------------------------------------------------------------------------->
-    <!--Botão para enviar as informações para o cartão SD !!FAZER!!-->
-    <!--Por enquanto ele só serve para ir para a próxima página-->
+    <!-------------------------------------------------------------------------------------------->
+    <!--Vai para a página de início - arquivo index.html-->
     <footer>
     <br>
     <button id="btn_salvar_usuario">Continuar</button>
@@ -87,5 +77,5 @@
 
     <script type="module" src="js/main.js"></script>
 </body>
-<!----------------------------------------------------------------------------------------------------------------------------------->
+<!---------------------------------------------------------------------------------------------->
 </html>
