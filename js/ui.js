@@ -3,9 +3,9 @@ mostrarHistorico() e sua nova função de gráfico (mostrarGraficoLinha()) vivem
 
 //-----------------------------------------------------------------------------------------------
 
-import { infoUsuario,  media_padrao } from './state.js';
+import { infoUsuario, media_padrao } from './state.js'; // <- Verifique se media_padrao está aqui
 import { analisa_resultados } from './logic.js';
-//import { LineGraph } from './script.js';
+
 //-----------------------------------------------------------------------------------------------
 // Mostra o histórico na aba de testes
 //Guardar o histórico no cartao?????
@@ -38,72 +38,82 @@ export function mostrarHistorico(){
 // Variável para guardar a instância do gráfico
 let meuGraficoDeLinha; 
 
-export function mostrarGraficoLinha() {
+export async function mostrarGraficoLinha() {
     
-    // 1. VERIFICAR SE HÁ DADOS
-    // (Verifica se o usuário está logado E se tem pelo menos 1 bloco)
-    if (!infoUsuario || infoUsuario.historicoTestes.length === 0) {
-        alert("Você precisa completar pelo menos um bloco de 3 tentativas para ver o gráfico.");
+    // 1. Verificação de Login
+    if (!infoUsuario) {
+        alert("Você precisa estar logado para ver o gráfico.");
         return; 
     }
 
+    const ESP_IP = "http://192.168.1.10"; // <--- MUDE ESTE VALOR PARA O IP DO SEU ESP
+    let historicoUsuario;
+
+    try {
+        // Pede o histórico MAIS ATUALIZADO do usuário logado
+        const response = await fetch(`${ESP_IP}/get-historico?email=${infoUsuario.email}`);
+        if (!response.ok) {
+            alert("Não foi possível buscar o histórico do Cartão SD. Verifique o ESP.");
+            return;
+        }
+        // O ESP retorna o usuário inteiro ou só o histórico
+        const usuarioAtualizado = await response.json();
+        historicoUsuario = usuarioAtualizado.historicoTestes; 
+        
+        // Atualiza nosso 'cache' local (infoUsuario) para manter consistente com o servidor
+        // E para que outras funções (como analisa_resultados) usem os dados mais recentes
+        infoUsuario.historicoTestes = historicoUsuario; // Atualiza o array diretamente
+        infoUsuario.tentativas = historicoUsuario.length; // Atualiza o contador de tentativas
+        localStorage.setItem('dadosUsuario', JSON.stringify(infoUsuario));
+
+    } catch (e) {
+        console.error("Erro ao conectar com ESP para buscar histórico:", e);
+        alert("Erro ao conectar com ESP para buscar histórico. Verifique a conexão.");
+        return;
+    }
+
+    // 2. VERIFICAR SE HÁ DADOS
+    if (historicoUsuario.length === 0) {
+        alert("Você ainda não possui testes no seu histórico.");
+        return;
+    }
+    
     const ctx = document.getElementById('grafico').getContext('2d');
-
-    // 2. LÓGICA DO LOTE (12 TENTATIVAS = 4 BLOCOS)
     
-    const totalBlocos = infoUsuario.historicoTestes.length; // Ex: 5 blocos
-    
-    // Define o limite máximo de blocos POR GRÁFICO
-    const maxBlocosNoGrafico = 4; // 12 tentativas / 3 = 4 blocos
-
-    // Descobre em qual "lote" ou "página" de gráfico nós estamos
-    // Math.ceil(1/4) = 1. Math.ceil(4/4) = 1.
-    // Math.ceil(5/4) = 2. Math.ceil(8/4) = 2.
-    const loteAtual = Math.ceil(totalBlocos / maxBlocosNoGrafico); // Ex: Se 5 blocos, loteAtual = 2
-
-    // 3. CALCULAR OS ÍNDICES DO ARRAY PARA ESTE LOTE
-    
-    // Lote 1 (índices 0-3): startIndex = (1-1)*4 = 0
-    // Lote 2 (índices 4-7): startIndex = (2-1)*4 = 4
+    const totalBlocos = historicoUsuario.length;
+    const maxBlocosNoGrafico = 4;
+    const loteAtual = Math.ceil(totalBlocos / maxBlocosNoGrafico);
     const startIndex = (loteAtual - 1) * maxBlocosNoGrafico;
-
-    // Lote 1: endIndex = Math.min(1*4, totalBlocos)
-    // Lote 2 (com 5 blocos): endIndex = Math.min(2*4, 5) = 5
     const endIndex = Math.min(loteAtual * maxBlocosNoGrafico, totalBlocos);
 
-    // 4. PREPARAÇÃO DOS DADOS
+    // --- CORREÇÃO: Inicializar os arrays ---
     const labelsGrafico = [];
     const dadosMediaUsuario = [];
     const dadosLimSup = [];
     const dadosLimInf = [];
 
-    // 5. PREENCHIMENTO DOS ARRAYS (Iterando APENAS no lote atual)
-    
-    // O loop começa do 'startIndex' e vai até o 'endIndex'
-    // Ex: Lote 2 (com 5 blocos): loop vai de i=4 até i<5 (ou seja, roda só para i=4)
+    // 5. PREENCHIMENTO (Iterando sobre o 'historicoUsuario' que veio do ESP)
     for (let i = startIndex; i < endIndex; i++) {
+        let testeAtual = historicoUsuario[i]; 
         
-        let testeAtual = infoUsuario.historicoTestes[i]; 
+        // A função 'analisa_resultados' usa o 'infoUsuario'
+        // que acabamos de atualizar com os dados do servidor.
+        analisa_resultados(i); // Esta função atualiza 'media_padrao'
         
-        // Analisa o teste 'i' para atualizar 'media_padrao'
-        analisa_resultados(i); 
-
-        // Adiciona um rótulo (i + 1) para contagem humana (Bloco 1, Bloco 2, ...)
         labelsGrafico.push(`Bloco ${i + 1} (Tipo ${testeAtual.tipo})`);
         
-        // Adiciona os dados para o Eixo Y
+        // --- CORREÇÃO: Preencher os arrays de dados ---
         dadosMediaUsuario.push(parseFloat(testeAtual.media));
         dadosLimSup.push(media_padrao.lim_sup);
         dadosLimInf.push(media_padrao.lim_inf);
     }
 
-    // 6. DESTRUIR GRÁFICO ANTIGO (Obrigatório para atualizar)
+    // 6. DESTRUIR GRÁFICO ANTIGO
     if (meuGraficoDeLinha) {
         meuGraficoDeLinha.destroy();
     }
 
-    // 7. CRIAÇÃO DO GRÁFICO
-    
+    // 7. CRIAÇÃO DO GRÁFICO (com dados frescos do Cartão SD)
     const dadosGrafico = {
         labels: labelsGrafico, 
         datasets: [
@@ -146,7 +156,6 @@ export function mostrarGraficoLinha() {
                     display: true,
                     position: 'top',
                 },
-                // Adiciona um título dinâmico para sabermos qual lote estamos vendo
                 title: {
                     display: true,
                     text: `Resultados do Lote ${loteAtual} (Tentativas ${startIndex * 3 + 1} a ${endIndex * 3})`

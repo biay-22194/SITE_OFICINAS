@@ -7,59 +7,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Cadastro</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<!------------------------------------------------------------------------------------------------>
 <body>
-    <!--Título da página e uma breve descrição/introdução-->
     <header>
         <h1>Medidor de tempo de reação</h1>
-        <p>Seja bem vindo ao site!</p><br>
         <p>Caso já possua uma conta, por favor <a href="entrar.html">clique aqui!</a></p><br>
     </header>
-    <!------------------------------------------------------------------------------------------->
+    
     <main>
-        <!--Seção para coletar as informações do usuário-->
         <h2>Por favor cadastre suas informações:</h2>
 
-        <!--Nome completo: tipo texto-->
-        <section>
-            <form>
-                <!--Nome-->
+        <form id="form-cadastro">
+            
+            <section>
                 <h3>Nome completo</h3>
-                <input type="text" id="inputNome" placeholder="Digite seu nome aqui..."><br>
+                <input type="text" id="inputNome" placeholder="Digite seu nome aqui..." required>
+            </section>
 
-                <!--Idade-->
-                <h3>Digite sua idade</h3>
-                <input type="number" id="inputIdade"><br>
+            <section>
+                <h3>Idade</h3>
+                <input type="number" id="inputIdade" required>
+            </section>
 
-                <!--Gênero-->
+            <section>
                 <h3>Gênero</h3>
-                <select id="inputGenero">
+                <select id="inputGenero" required>
                     <option value="">Selecione uma opção...</option>
                     <option value="masculino">Masculino</option>
                     <option value="feminino">Feminino</option>
-                </select><br>
+                </select>
+            </section>
 
-                <!--Email-->
+            <section>
                 <h3>E-mail</h3>
-                <input type="email" id="inputEmail" placeholder="Digite seu e-mail aqui..."><br>
+                <input type="email" id="inputEmail" placeholder="Digite seu e-mail aqui..." required>
+            </section>
 
-                <!--Senha-->
+            <section>
                 <h3>Senha</h3>
-                <input type="password" id="inputSenha" placeholder="Crie uma senha..."><br>
-                <br>
-                <!--Botão que armazena as informações e vai para a página de início-->
-                <button id="btn_salvar_usuario">Continuar</button>
-            </form> 
-        </section>
+                <input type="password" id="inputSenha" placeholder="Crie uma senha..." required>
+            </section>
 
-        
-
+            <br>
+            <button type="submit">Continuar</button>
+        </form>
     </main>
 
     <script type="module" src="js/main.js"></script>
 </body>
-<!---------------------------------------------------------------------------------------------->
 </html>

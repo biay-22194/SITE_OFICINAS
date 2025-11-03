@@ -3,7 +3,7 @@ state. armazenar_testes e analisa_resultados vivem aqui. */
 
 //------------------------------------------------------------------------------------------------
 
-import { listaUsuarios, infoUsuario, media_padrao } from './state.js';
+import { infoUsuario, media_padrao } from './state.js';
 import { mostrarHistorico } from './ui.js';
 
 //------------------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@ import { mostrarHistorico } from './ui.js';
 // !!!!!!!!!!!!!!!!!!!!!Precisa enviar as informações de cadastro para o cartão SD!!!!!!!!!!!!!!!!!!!!!
 // linha 91 precisa salvar no cartao 
 // localStorage.setItem('usuariosCadastrados', JSON.stringify(listaUsuarios));
-export function armazenar_info_usuario(){
+export async function armazenar_info_usuario(){
     
     // Armazena nome
     let inputNome = document.getElementById("inputNome");
@@ -66,39 +66,52 @@ export function armazenar_info_usuario(){
         return; // Para a execução se houver erros
     }
 
-    // Se o email já existe
-    const emailJaExiste = listaUsuarios.find(usuario => usuario.email === email);
-    if (emailJaExiste) {
-        alert("Este e-mail já foi cadastrado. Por favor, use outro.");
-        return;
-    }
-
     const novoUsuario = {
         nome: nome,
         idade: parseInt(idadeString),
         genero: genero,
         email: email,
-        senha: senha,
-        historicoTestes: [], // O 'dadosTestes' pessoal deste usuário
-        tentativas: 0        // O 'tentativas' pessoal deste usuário
+        senha: senha
     };
 
-    // 2. Adiciona o novo usuário ao array
-    listaUsuarios.push(novoUsuario);
+    const ESP_IP = "http://192.168.1.10";
 
-    //SALVAR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // 3. Salva o array ATUALIZADO de volta no localStorage
-    localStorage.setItem('usuariosCadastrados', JSON.stringify(listaUsuarios));
+    try {
+        // Envia os dados para o endpoint '/cadastro' no seu ESP
+        const response = await fetch('/cadastro', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(novoUsuario) // Converte o objeto JS para uma string JSON
+        });
 
-    // Redireciona para a página de ENTRAR (não para o index)
-    window.location.href = "index.html";
+        // Verifica se o ESP respondeu com sucesso (ex: status 200 ou 201)
+        if (response.ok) {
+            alert("Cadastro realizado com sucesso! Você será redirecionado para o login.");
+            // Boa prática: redirecionar para 'entrar.html' após o cadastro
+            window.location.href = "entrar.html"; 
+        } else {
+            // Se o ESP retornar um erro (ex: status 409 - Conflito)
+            // Isso significa que o ESP detectou um e-mail duplicado
+            const erroMsg = await response.text(); // Pega a msg de erro do ESP
+            alert(`Erro no cadastro: ${erroMsg}`); // Ex: "Erro no cadastro: E-mail já existe"
+        }
+
+    } catch (error) {
+        // Isso acontece se o ESP estiver offline ou houver erro de rede
+        console.error("Falha ao conectar com o ESP:", error);
+        alert("Não foi possível conectar ao servidor. Verifique a rede e tente novamente.");
+    }
 }
+
+
 
 //------------------------------------------------------------------------------------------------
 
 // Compara o input com as informacoes guardadas na listaUsuarios
 // ver linha 130
-export function compara_informacoes_entrada(){
+export async function compara_informacoes_entrada(){
 
     // Armazena email 
     let entradaEmail = document.getElementById("email_entrar");
@@ -114,27 +127,111 @@ export function compara_informacoes_entrada(){
         return; // Para a execução
     } 
 
-    // 2. Procura na 'listaUsuarios'
-    //    Usamos .toLowerCase() para tornar a busca do E-MAIL insensível ao caso.
-    const usuarioEncontrado = listaUsuarios.find(usuario => 
-        usuario.email.toLowerCase() === email.toLowerCase() && // <-- A CORREÇÃO ESTÁ AQUI
-        usuario.senha === senha // A senha continua sensível ao caso
-    );
+    const ESP_IP = "http://192.168.1.10"; // <--- MUDE ESTE VALOR se necessário
 
-    // 3. Verifica se o usuário foi encontrado
-    if (usuarioEncontrado) {
-        // SUCESSO!
-        console.log("SUCESSO: Usuário encontrado:", usuarioEncontrado);
+    try {
+        // 4. Envia os dados de login para o endpoint '/login' no ESP
+        const response = await fetch(`${ESP_IP}/login`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: email, senha: senha })
+        });
+
+        // 5. Se o ESP disser "OK" (login e senha corretos)
+        if (response.ok) {
+            
+            // O ESP DEVE enviar de volta o objeto do usuário (com o histórico)
+            const usuarioLogado = await response.json(); 
+
+            // --- ESTE É O "SEGREDO" ---
+            // Salvamos o usuário retornado (com seu histórico)
+            // no localStorage para que o resto do app possa usá-lo!
+            // O resto do seu app (gráficos, etc.) funcionará como antes!
+            localStorage.setItem('dadosUsuario', JSON.stringify(usuarioLogado));
+            
+            // Redireciona para a página principal
+            window.location.href = "index.html"; 
+
+        } else { 
+            // Se o ESP disser que o login falhou (status 401, 404, etc)
+            alert("E-mail ou senha incorretos. Por favor, tente novamente.");
+        }
+
+    } catch (error) {
+        // Isso acontece se o ESP estiver offline
+        console.error("Falha ao conectar com o ESP:", error);
+        alert("Não foi possível conectar ao servidor para fazer o login.");
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+
+export async function sincronizarEArmazenarTeste() {
+    
+    // 1. Verificação de Login
+    if (!infoUsuario) {
+        alert("ERRO: Você não está logado! Por favor, faça o login para salvar os testes.");
+        window.location.href = "entrar.html";
+        return; 
+    }
+    
+    const ESP_IP = "http://192.168.1.10"; // <--- MUDE ESTE VALOR
+    let novoTeste;
+
+    // 2. BUSCAR o novo teste do ESP (GET)
+    try {
+        const responseGet = await fetch(`${ESP_IP}/get-novo-teste`); // Endpoint GET
         
-        // Salva os dados DESTE usuário para o resto do app usar
-        localStorage.setItem('dadosUsuario', JSON.stringify(usuarioEncontrado));
+        if (!responseGet.ok) {
+            alert("Nenhum teste novo encontrado no cartão SD.");
+            return; // Para a função se não houver teste
+        }
         
-        window.location.href = "index.html"; // Redireciona para a pág principal
-    } 
-    else {
-        // FALHA!
-        console.warn("FALHA: E-mail ou senha não correspondem.");
-        alert("E-mail ou senha incorretos. Por favor, tente novamente.");
+        novoTeste = await responseGet.json(); // Ex: { tipo: "1", tempo: "450", media: "480" }
+
+        // Atualiza a tela (os <span>s) com os valores recebidos
+        document.getElementById("teste").textContent = novoTeste.tipo;
+        document.getElementById("tempo").textContent = novoTeste.tempo;
+        document.getElementById("media").textContent = novoTeste.media;
+
+    } catch (error) {
+        console.error("Erro ao BUSCAR teste do ESP:", error);
+        alert("Erro ao conectar com ESP para buscar o teste.");
+        return; // Para a função se houver erro
+    }
+
+    // 3. SALVAR o teste no histórico do usuário (POST)
+    try {
+        const responseSave = await fetch(`${ESP_IP}/salvar-teste`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                email: infoUsuario.email, // Diz ao ESP para qual usuário salvar
+                teste: novoTeste          // O objeto {tipo, tempo, media}
+            })
+        });
+
+        if (!responseSave.ok) {
+            alert("Falha ao salvar o teste no Cartão SD (servidor).");
+        } else {
+            alert("Novo teste sincronizado e salvo com sucesso!");
+            
+            // 4. Atualizar a UI (Interface)
+            // Adiciona o novo teste ao nosso 'cache' local
+            infoUsuario.historicoTestes.push(novoTeste);
+            infoUsuario.tentativas++;
+            
+            // Salva o 'infoUsuario' atualizado no localStorage
+            localStorage.setItem('dadosUsuario', JSON.stringify(infoUsuario));
+            
+            // Chama a função para redesenhar a lista <ul> no HTML
+            mostrarHistorico(); 
+        }
+    } catch (error) {
+        console.error("Erro ao SALVAR teste no ESP:", error);
+        alert("Erro ao conectar com ESP para salvar o teste.");
     }
 }
 
@@ -143,58 +240,63 @@ export function compara_informacoes_entrada(){
 //Armazena as informações dos testes 
 // !!!!!!!!!!!!!!!!!!!!!Precisa receber as informações dos testes do cartão SD!!!!!!!!!!!!!!!!!!!!!
 // variáveis a serem preenchidas:  inpuTeste, inputTempo, inputMedia
-export function armazenar_testes(){
+// Em logic.js
 
-    // Se 'infoUsuario' for 'null' (ou seja, ninguém está logado)
+
+export async function sincronizar_novo_teste() {
+    
+    // 1. Verificação de Login
     if (!infoUsuario) {
-        alert("ERRO: Você não está logado! Por favor, faça o login para salvar os testes.");
-        // Redireciona para a página de login para forçar o login
-        window.location.href = "entrar.html"; // Mude para o nome da sua pág de login
-        return; // Para a execução da função aqui
+        alert("ERRO: Você não está logado!");
+        window.location.href = "entrar.html";
+        return;
     }
-
-    // (Simulação) Recebe os valores do cartão SD
-    let inputTeste = document.getElementById("inputTeste").value;
-    let inputTempo = document.getElementById("inputTempo").value;
-    let inputMedia = document.getElementById("inputMedia").value;
     
-    // Cria o objeto para o teste atual
-    let novoTeste = { 
-        tipo: inputTeste,
-        tempo: inputTempo, 
-        media: inputMedia 
-    };
+    const ESP_IP = "http://192.168.1.10"; // <--- MUDE ESTE VALOR
+    let novoTeste;
 
-    const msg_atualizar_pagina = document.getElementById("msg_atualizar_pagina");
-    
-    // Atualiza os valores na tela (usando os <span>s)
-    document.getElementById("teste").textContent = inputTeste;
-    document.getElementById("tempo").textContent = inputTempo;
-    document.getElementById("media").textContent = inputMedia;
-    
-
-    if(inputTeste === "" || inputTempo === "" || inputMedia === ""){
-        // Mostra a mensagem de erro na primeira vez
-        msg_atualizar_pagina.textContent = "Por favor faça uma tentativa antes de atualizar a página!";
-    }
-    else {
-        msg_atualizar_pagina.textContent = ""; // Limpa a mensagem de erro
-        infoUsuario.historicoTestes.push(novoTeste);
-        // Incrementa as TENTATIVAS PESSOAIS do usuário logado
-        infoUsuario.tentativas++;
-        // Chama a função para redesenhar o histórico
-        mostrarHistorico();
-
-        localStorage.setItem('dadosUsuario', JSON.stringify(infoUsuario));
-
-        const indexUsuario = listaUsuarios.findIndex(user => user.email === infoUsuario.email);
-        if (indexUsuario !== -1) {
-            listaUsuarios[indexUsuario] = infoUsuario; // Substitui o objeto antigo pelo novo
-            // Salva a lista inteira de volta no localStorage
-            localStorage.setItem('usuariosCadastrados', JSON.stringify(listaUsuarios));
+    // 2. PEDIR o novo teste ao ESP (que leu do SD)
+    try {
+        const response = await fetch(`${ESP_IP}/get-novo-teste`); // Endpoint GET
+        if (!response.ok) {
+            alert("Nenhum teste novo encontrado no cartão.");
+            return;
         }
+        novoTeste = await response.json(); // Ex: { tipo: "1", tempo: "450", media: "480" }
+
+        // Atualiza a tela com os valores recebidos
+        document.getElementById("teste").textContent = novoTeste.tipo;
+        document.getElementById("tempo").textContent = novoTeste.tempo;
+        document.getElementById("media").textContent = novoTeste.media;
+
+    } catch (e) {
+        alert("Erro ao conectar com ESP para buscar teste.");
+        return;
     }
- 
+
+    // 3. SALVAR o teste no histórico do usuário (via ESP)
+    try {
+        const responseSave = await fetch(`${ESP_IP}/salvar-teste`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                email: infoUsuario.email, // Diz ao ESP para qual usuário salvar
+                teste: novoTeste
+            })
+        });
+
+        if (!responseSave.ok) {
+            alert("Falha ao salvar o teste no Cartão SD.");
+        } else {
+            alert("Novo teste sincronizado e salvo!");
+            // Opcional: atualizar o histórico local para o gráfico
+            infoUsuario.historicoTestes.push(novoTeste);
+            localStorage.setItem('dadosUsuario', JSON.stringify(infoUsuario));
+            mostrarHistorico(); // Atualiza a UI
+        }
+    } catch (e) {
+        alert("Erro ao conectar com ESP para salvar teste.");
+    }
 }
 
 //------------------------------------------------------------------------------------------------

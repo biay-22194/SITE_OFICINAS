@@ -6,37 +6,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrar no site</title>
+    <title>Entrar</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-    <!--Título-->
-    <h1>Entrar</h1>
-
+    <header>
+        <h1>Medidor de tempo de reação</h1>
+        <p>Ainda não tem uma conta?</p><br>
+    </header>
+    
     <main>
-         <!--Email: tipo email-->
-        <section>
-            <h3>E-mail</h3>
-            <form>
-                <input type="email" id="email_entrar" placeholder="Digite seu e-mail aqui...">
-            </form> 
-        </section>
+        <h2>Entrar na sua conta:</h2>
 
-        <!--Senha: tipo senha-->
-        <section>
-            <h3>Senha</h3>
-            <form>
-                <input type="password" id="senha_entrar" placeholder="Crie uma senha...">
-            </form> 
-        </section>
+        <form id="form-login">
+            
+            <section>
+                <h3>E-mail</h3>
+                <input type="email" id="email_entrar" placeholder="Digite seu e-mail aqui..." required>
+            </section>
+
+            <section>
+                <h3>Senha</h3>
+                <input type="password" id="senha_entrar" placeholder="Digite sua senha..." required>
+            </section>
+
+            <br>
+            <button type="submit">Entrar</button>
+        </form>
     </main>
 
-    <footer>
-        <br>
-        <button id="btn_entrar">Continuar</button>
-    </footer>
-    
     <script type="module" src="js/main.js"></script>
 </body>
 </html>

@@ -11,13 +11,10 @@ exporta suas variáveis "globais", como a lista de testes e as infos do usuário
 // armazenadas localmente 
 
 //Armazena os usuários em si 
-export let listaUsuarios = JSON.parse(localStorage.getItem('usuariosCadastrados')) || [];
-
-// Carrega o OBJETO do usuário que está logado
-// (Este objeto já contém o historicoTestes e tentativas dele)
 export let infoUsuario = JSON.parse(localStorage.getItem('dadosUsuario')) || null;
 
-//Média para cada caso específico - não sei dizer se precisa armazenar 
+// Média para cada caso específico - NÃO PRECISA ARMAZENAR NO SD.
+// Esta é uma variável de cálculo temporária.
 export let media_padrao = {
             lim_inf: 0,
             lim_sup: 0
